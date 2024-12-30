@@ -1,0 +1,16 @@
+{
+  "version": "2.0",
+  "app_name": "dataone-package-notify",
+  "environment_variables": {
+    "REGION_NAME": "us-east-1",
+    "SECRET_MANAGER_NAME": "prod/DataONENotifications/env",
+    "DATAONE_API_URL": "https://cib.dataone.org/metacat/d1/mn/v2",
+    "DATAONE_SUMMARY_URL": "https://cib.dataone.org/profile"
+  },
+  "stages": {
+    "dev": {
+      "api_gateway_stage": "api",
+      "autogen_policy": false
+    }
+  }
+}
