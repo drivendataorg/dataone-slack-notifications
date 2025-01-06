@@ -5,6 +5,7 @@
     "REGION_NAME": "us-east-1",
     "SECRET_MANAGER_NAME": "prod/DataONENotifications/env",
     "DATAONE_API_URL": "https://cib.dataone.org/metacat/d1/mn/v2",
+    "DATAONE_DATA_SOURCE": "CIB",
     "DATAONE_SUMMARY_URL": "https://cib.dataone.org/profile"
   },
   "stages": {

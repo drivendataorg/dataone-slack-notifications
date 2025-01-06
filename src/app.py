@@ -15,6 +15,7 @@ logger.setLevel(logging.INFO)
 SECRET_MANAGER_NAME = os.environ["SECRET_MANAGER_NAME"]
 REGION_NAME = os.environ["REGION_NAME"]
 DATAONE_API_URL = os.environ["DATAONE_API_URL"].strip("/")
+DATAONE_DATA_SOURCE = os.environ["DATAONE_DATA_SOURCE"]
 DATAONE_SUMMARY_URL = os.environ["DATAONE_SUMMARY_URL"].strip("/")
 
 app = Chalice(app_name="dataone-package-notify")
@@ -38,49 +39,19 @@ def get_secret(key):
     return SECRETS[key]
 
 
-def sum_object_sizes(
-    start: int = 0,
-    page_size: int = 1000,
-    max_count: int = 3000,
-    running_total_size: int = 0,
-    running_count: int = 0,
-):
-    response = requests.get(f"{DATAONE_API_URL}/object?start={start}&count={page_size}")
-    tree = ElementTree.fromstring(response.content)
-    running_count += len(tree)
-    total_this_time = sum(int(item.find("size").text) for item in tree)
-    running_total_size += total_this_time
-    if max_count is None:
-        max_count = int(tree.attrib.get("total"))
-    logger.debug(
-        f"start {start}, "
-        f"running_total_size {running_total_size}, "
-        f"running_count {running_count}, "
-        f"len(tree) {len(tree)}, "
-        f"batch_size {page_size}, "
-        f"total {max_count}, "
-        f"total_this_time {total_this_time}"
-    )
-    if (len(tree) > 0) or (running_count > max_count):
-        running_total_size += sum_object_sizes(
-            start=start + page_size,
-            page_size=page_size,
-            max_count=max_count,
-            running_total_size=running_total_size,
-            running_count=running_count,
-        )
-
-    return running_total_size
-
-
 def get_metrics():
     response = requests.get(f"{DATAONE_API_URL}/object?start=0&count=0")
     tree = ElementTree.fromstring(response.content)
     object_count = int(tree.attrib.get("total"))
 
-    total_size = sum_object_sizes()
+    response = requests.get(
+        f"{DATAONE_API_URL}/query/solr/?q=datasource:*{DATAONE_DATA_SOURCE}&wt=json&rows=0&stats=true&stats.field=size"
+    )
+    total_size = response.json()["stats"]["stats_fields"]["size"]["sum"]
 
-    logger.info(f"Retrieved metrics object count {object_count} and total size {total_size}")
+    logger.info(
+        f"Retrieved metrics object count {object_count} and total size {total_size}"
+    )
 
     return {
         "text": "Repository report",
@@ -107,7 +78,7 @@ def get_metrics():
                 "fields": [
                     {
                         "type": "mrkdwn",
-                        "text": f"*Object count*: {object_count:,}\n*Total size*: {total_size / 10**9:.2}GB",
+                        "text": f"*Object count*: {object_count:,}\n*Total size*: {total_size / 2**30:.2f}GiB",
                     }
                 ],
             },
