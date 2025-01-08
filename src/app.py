@@ -78,7 +78,7 @@ def get_metrics():
                 "fields": [
                     {
                         "type": "mrkdwn",
-                        "text": f"*Object count*: {object_count:,}\n*Total size*: {total_size / 2**30:.2f}GiB",
+                        "text": f"*Object count*: {object_count:,}\n*Total size*: {total_size / 2**30:.2f} GiB",
                     }
                 ],
             },
