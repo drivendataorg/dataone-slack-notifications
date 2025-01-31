@@ -49,8 +49,20 @@ def get_metrics():
     )
     total_size = response.json()["stats"]["stats_fields"]["size"]["sum"]
 
+    # number of metadata records that are not a collection or a portal and are not obsoleted
+    response = requests.get(
+        f"{DATAONE_API_URL}/query/solr/"
+        "q=*:*%20&"
+        "fq=-formatId:*dataone.org/collections*%20AND%20-formatId:*dataone.org/portals*%20AND%20formatType:METADATA%20AND%20-obsoletedBy:*"
+        "&stats=false"
+        "&stats.field=size"
+        "&rows=0"
+        "&wt=json"
+    )
+    data_package_count = response.json()["response"]["numFound"]
+
     logger.info(
-        f"Retrieved metrics object count {object_count} and total size {total_size}"
+        f"Retrieved metrics data package count {data_package_count}; object count {object_count}; and total size {total_size}"
     )
 
     return {
@@ -78,7 +90,9 @@ def get_metrics():
                 "fields": [
                     {
                         "type": "mrkdwn",
-                        "text": f"*Object count*: {object_count:,}\n*Total size*: {total_size / 2**30:.2f} GiB",
+                        "text": f"*Total size*: {total_size / 2**30:.2f} GiB\n"
+                        f"*Dataset count*: {data_package_count:,}\n"
+                        f"*Object count*: {object_count:,}",
                     }
                 ],
             },

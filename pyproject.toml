@@ -9,3 +9,11 @@ dependencies = [
     "chalice>=1.31.3",
     "requests>=2.32.3",
 ]
+
+[dependency-groups]
+dev = [
+    "jupyter>=1.1.1",
+    "python-dotenv>=1.0.1",
+    "python-lsp-ruff>=2.2.2",
+    "python-lsp-server[all]>=1.12.0",
+]
