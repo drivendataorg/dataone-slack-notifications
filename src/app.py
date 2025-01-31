@@ -86,7 +86,7 @@ def get_metrics():
     }
 
 
-@app.schedule(Cron("0", "12", "?", "*", "MON-FRI", "*"))
+@app.schedule(Cron("0", "12", "?", "*", "MON", "*"))
 def size_report(event):
     logger.info("Lambda triggered by schedule")
     metrics = get_metrics()
